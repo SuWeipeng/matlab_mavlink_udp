@@ -14,7 +14,7 @@ fc = 0.1;
 h1 = plot(time,rpm,'-r.');
 hold on
 grid on
-h2 = plot(time,rpm,'g');
+h2 = plot(time,rpm,'b');
 h3 = plot(time,rpm,'LineWidth',3,'Color',[0 0 1]);
 
 ylim([-300 300])
