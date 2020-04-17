@@ -74,34 +74,6 @@ grid on
 xlim([-1 1])
 ylim([-1 1])
 zlim([-1 1])
-
-% subplot(3,2,4);
-% h5 = plot(time,gy,'-b.');
-% grid on
-% ylim([-1000 1000])
-% set(gca, 'GridLineStyle', ':');
-% set(gca, 'GridAlpha', 1);
-% set(gca, 'YTick', -1000:0.2:1000);
-% N = 5;
-% a = get(gca,'YTickLabel');
-% b = cell(size(a));
-% b(mod(1:size(a,1),N)==1,:) = a(mod(1:size(a,1),N)==1,:);
-% set(gca,'YTickLabel',b);
-% ylim([-inf inf])
-% 
-% subplot(3,2,6);
-% h6 = plot(time,gz,'-b.');
-% grid on
-% ylim([-1000 1000])
-% set(gca, 'GridLineStyle', ':');
-% set(gca, 'GridAlpha', 1);
-% set(gca, 'YTick', -1000:0.2:1000);
-% N = 5;
-% a = get(gca,'YTickLabel');
-% b = cell(size(a));
-% b(mod(1:size(a,1),N)==1,:) = a(mod(1:size(a,1),N)==1,:);
-% set(gca,'YTickLabel',b);
-% ylim([-inf inf])
  
 t = udp('127.0.0.1', 80, 'LocalPort', 14550);
 t.InputBufferSize = 1024*10;
@@ -207,10 +179,6 @@ while 1
                     h4.XData = s_x;
                     h4.YData = s_y;
                     h4.ZData = s_z;
-%                     h5.XData = time;
-%                     h5.YData = gy;
-%                     h6.XData = time;
-%                     h6.YData = gz;
                     drawnow
                     i = i + 1;
                 end
