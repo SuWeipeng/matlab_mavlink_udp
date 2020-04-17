@@ -39,6 +39,7 @@ b1 = cell(size(a1));
 b1(mod(1:size(a1,1),N)==1,:) = a1(mod(1:size(a1,1),N)==1,:);
 set(gca,'YTickLabel',b1);
 ylim([-inf inf])
+title("Ax",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
 
 subplot(3,2,3);
 h2 = plot(time,ay,'-r.');
@@ -53,6 +54,7 @@ b2 = cell(size(a2));
 b2(mod(1:size(a2,1),N)==1,:) = a2(mod(1:size(a2,1),N)==1,:);
 set(gca,'YTickLabel',b2);
 ylim([-inf inf])
+title("Ay",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
 
 subplot(3,2,5);
 h3 = plot(time,az,'-r.');
@@ -67,6 +69,7 @@ b3 = cell(size(a3));
 b3(mod(1:size(a3,1),N)==1,:) = a3(mod(1:size(a3,1),N)==1,:);
 set(gca,'YTickLabel',b3);
 ylim([-inf inf])
+title("Az",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
 
 subplot(3,2,[2 4 6])
 h4 = surf(s_x, s_y, s_z);
