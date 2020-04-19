@@ -83,6 +83,10 @@ t.InputBufferSize = 1024*10;
 
 fopen(t)
 
+attitude = [0, 0, 0]';
+phi      = attitude(1,1);
+theta    = attitude(2,1);
+psi      = attitude(3,1);
 i = 1;
 while 1
     tic
@@ -97,20 +101,34 @@ while 1
                         ax(i,1) = single(int16_t(A,11,12) * 9.8) / 1000;
                         ay(i,1) = single(int16_t(A,13,14) * 9.8) / 1000;
                         az(i,1) = single(int16_t(A,15,16) * 9.8) / 1000;
-                        gx(i,1) = single(int16_t(A,17,18)) / 100;
-                        gy(i,1) = single(int16_t(A,19,20)) / 100;
-                        gz(i,1) = single(int16_t(A,21,22)) / 100;
+                        gx(i,1) = double(int16_t(A,17,18)) * pi() / 18000;
+                        gy(i,1) = double(int16_t(A,19,20)) * pi() / 18000;
+                        gz(i,1) = double(int16_t(A,21,22)) * pi() / 18000;
                         
-                        temp = ax(i,1);
-                        ax(i,1) = -ay(i,1);
-                        ay(i,1) = temp;
+                        temp = gx(i,1);
+                        gx(i,1) = -gy(i,1);
+                        gy(i,1) = temp;
                         
-                        phi   = atan2( ay(i,1), sqrt(ax(i,1) ^ 2 + az(i,1) ^ 2));
-                        theta = atan2(-ax(i,1), sqrt(ay(i,1) ^ 2 + az(i,1) ^ 2));
+                        gyro = [gx(i,1) gy(i,1) gz(i,1)]';
                         
-                        point_a = RY(RX([1,0,0]',phi),theta);
-                        point_b = RY(RX([0,-1,0]',phi),theta);
-                        point_c = RY(RX([0,1,0]',phi),theta);
+                        trans = [1, sin(phi) * tan(theta),  cos(phi) * tan(theta);
+                                 0, cos(phi)             , -sin(phi);
+                                 0, sin(phi) * sec(theta),  cos(phi) * sec(theta)];
+                             
+                        if i > 1
+                            dt = single(time(i,1) - time(i-1,1)) / 1000;
+                            attitude = attitude + trans * gyro .* dt;
+                        else
+                            dt = 0;
+                        end                        
+                        
+                        phi   = attitude(1,1);
+                        theta = attitude(2,1);
+                        psi   = attitude(3,1);
+                        
+                        point_a = RZ(RY(RX([1,0,0]',phi),theta),psi);
+                        point_b = RZ(RY(RX([0,-1,0]',phi),theta),psi);
+                        point_c = RZ(RY(RX([0,1,0]',phi),theta),psi);
                         
                         point_d = point_b - 0.5 * (point_b - point_c);
                         s_x = [point_a(1,1), point_b(1,1), point_c(1,1), point_a(1,1);
@@ -122,9 +140,9 @@ while 1
                         
                         
                         disp(['time: ',num2str(time(i,1)),', ' ...
-                            'ax: ',num2str(ax(i,1)),', ' ...
-                            'ay: ', num2str(ay(i,1)),', ' ...
-                            'az: ', num2str(az(i,1)),', ' ...
+                            'gx: ',num2str(gx(i,1)),', ' ...
+                            'gy: ', num2str(gy(i,1)),', ' ...
+                            'gz: ', num2str(gz(i,1)),', ' ...
                             'phi: ', num2str(phi),', ' ...
                             'theta: ', num2str(theta)])
                     else
@@ -139,16 +157,26 @@ while 1
                         ax(100,1) = single(int16_t(A,11,12) * 9.8) / 1000;
                         ay(100,1) = single(int16_t(A,13,14) * 9.8) / 1000;
                         az(100,1) = single(int16_t(A,15,16) * 9.8) / 1000;
-                        gx(100,1) = single(int16_t(A,17,18)) / 100;
-                        gy(100,1) = single(int16_t(A,19,20)) / 100;
-                        gz(100,1) = single(int16_t(A,21,22)) / 100;
+                        gx(100,1) = double(int16_t(A,17,18)) * pi() / 18000;
+                        gy(100,1) = double(int16_t(A,19,20)) * pi() / 18000;
+                        gz(100,1) = double(int16_t(A,21,22)) * pi() / 18000;
                         
-                        temp = ax(100,1);
-                        ax(100,1) = -ay(100,1);
-                        ay(100,1) = temp;
+                        temp = gx(100,1);
+                        gx(100,1) = -gy(100,1);
+                        gy(100,1) = temp;
                         
-                        phi   = atan2( ay(100,1), sqrt(ax(100,1) ^ 2 + az(100,1) ^ 2));
-                        theta = atan2(-ax(100,1), sqrt(ay(100,1) ^ 2 + az(100,1) ^ 2));
+                        gyro = [gx(100,1) gy(100,1) gz(100,1)]';
+                        
+                        trans = [1, sin(phi) * tan(theta),  cos(phi) * tan(theta);
+                                 0, cos(phi)             , -sin(phi);
+                                 0, sin(phi) * sec(theta),  cos(phi) * sec(theta)];
+                             
+                        dt = single(time(100,1) - time(99,1)) / 1000;
+                        attitude = attitude + trans * gyro .* dt;
+                        
+                        phi   = attitude(1,1);
+                        theta = attitude(2,1);
+                        psi   = attitude(3,1);
                         
                         point_a = RY(RX([1,0,0]',phi),theta);
                         point_b = RY(RX([0,-1,0]',phi),theta);
@@ -164,9 +192,9 @@ while 1
                         
                         
                         disp(['time: ',num2str(time(100,1)),', ' ...
-                            'ax: ',num2str(ax(100,1)),', ' ...
-                            'ay: ', num2str(ay(100,1)),', ' ...
-                            'az: ', num2str(az(100,1)),', ' ...
+                            'gx: ',num2str(gx(100,1)),', ' ...
+                            'gy: ', num2str(gy(100,1)),', ' ...
+                            'gz: ', num2str(gz(100,1)),', ' ...
                             'phi: ', num2str(phi),', ' ...
                             'theta: ', num2str(theta)])
                     end
