@@ -27,7 +27,7 @@ theta = 0;
 points = RY(RX([point_a,point_b,point_c],phi),theta);
 
 subplot(3,2,1);
-h1 = plot(time,ax,'-r.');
+h1 = plot(time,gx,'-r.');
 grid on
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
@@ -39,10 +39,10 @@ b1 = cell(size(a1));
 b1(mod(1:size(a1,1),N)==1,:) = a1(mod(1:size(a1,1),N)==1,:);
 set(gca,'YTickLabel',b1);
 ylim([-inf inf])
-title("Ax",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
+title("Gx",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
 
 subplot(3,2,3);
-h2 = plot(time,ay,'-r.');
+h2 = plot(time,gy,'-r.');
 grid on
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
@@ -54,10 +54,10 @@ b2 = cell(size(a2));
 b2(mod(1:size(a2,1),N)==1,:) = a2(mod(1:size(a2,1),N)==1,:);
 set(gca,'YTickLabel',b2);
 ylim([-inf inf])
-title("Ay",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
+title("Gy",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
 
 subplot(3,2,5);
-h3 = plot(time,az,'-r.');
+h3 = plot(time,gz,'-r.');
 grid on
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
@@ -69,7 +69,7 @@ b3 = cell(size(a3));
 b3(mod(1:size(a3,1),N)==1,:) = a3(mod(1:size(a3,1),N)==1,:);
 set(gca,'YTickLabel',b3);
 ylim([-inf inf])
-title("Az",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
+title("Gz",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
 
 subplot(3,2,[2 4 6])
 h4 = surf(s_x, s_y, s_z);
@@ -200,11 +200,11 @@ while 1
                     end
 
                     h1.XData = time;
-                    h1.YData = ax;
+                    h1.YData = gx;
                     h2.XData = time;
-                    h2.YData = ay;
+                    h2.YData = gy;
                     h3.XData = time;
-                    h3.YData = az;
+                    h3.YData = gz;
                     h4.XData = s_x;
                     h4.YData = s_y;
                     h4.ZData = s_z;
