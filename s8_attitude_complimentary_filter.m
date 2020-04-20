@@ -24,11 +24,11 @@ theta_gyro = attitude_gyro(2,1);
 psi_gyro   = attitude_gyro(3,1);
 
 subplot(2,2,[1 2]);
-h1 = plot(time,gx,'-b.');
+h1 = plot(time,ax,'-r.');
 hold on
 grid on
-h2 = plot(time,ax,'-r.');
-h5 = plot(time,phi_flt,'LineWidth',3,'Color',[1 0 1]);
+h2 = plot(time,phi_flt,'LineWidth',3,'Color',[1 0 1]);
+% h5 = plot(time,gx,'-b.');
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
 set(gca, 'GridAlpha', 1);
@@ -42,11 +42,11 @@ ylim([-inf inf])
 title("phi",'FontSize',12,'FontWeight','bold','Color','r','Rotation',0)
 
 subplot(2,2,[3 4]);
-h3 = plot(time,gy,'-b.');
+h3 = plot(time,ay,'-r.');
 hold on
 grid on
-h4 = plot(time,ay,'-r.');
-h6 = plot(time,theta_flt,'LineWidth',3,'Color',[1 0 1]);
+h4 = plot(time,theta_flt,'LineWidth',3,'Color',[1 0 1]);
+% h6 = plot(time,gy,'-b.');
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
 set(gca, 'GridAlpha', 1);
@@ -193,17 +193,17 @@ while 1
                     end
 
                     h1.XData = time;
-                    h1.YData = phi_gyro;
+                    h1.YData = phi_acc;
                     h2.XData = time;
-                    h2.YData = phi_acc;
+                    h2.YData = phi_flt;
                     h3.XData = time;
-                    h3.YData = theta_gyro;
+                    h3.YData = theta_acc;
                     h4.XData = time;
-                    h4.YData = theta_acc;
+                    h4.YData = theta_flt;
                     h5.XData = time;
-                    h5.YData = phi_flt;
+                    h5.YData = phi_gyro;
                     h6.XData = time;
-                    h6.YData = theta_flt;
+                    h6.YData = theta_gyro;                                                            
                     drawnow
                     i = i + 1;
                 end
