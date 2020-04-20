@@ -21,11 +21,6 @@ s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
 s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
        point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
 
-phi = 0;
-theta = 0;
-
-points = RY(RX([point_a,point_b,point_c],phi),theta);
-
 subplot(3,2,1);
 h1 = plot(time,gx,'-r.');
 grid on
@@ -83,10 +78,11 @@ t.InputBufferSize = 1024*10;
 
 fopen(t)
 
-attitude = [0, 0, 0]';
-phi      = attitude(1,1);
-theta    = attitude(2,1);
-psi      = attitude(3,1);
+attitude_gyro = [0, 0, 0]';
+phi_gyro      = attitude_gyro(1,1);
+theta_gyro    = attitude_gyro(2,1);
+psi_gyro      = attitude_gyro(3,1);
+
 i = 1;
 while 1
     tic
@@ -95,116 +91,78 @@ while 1
         msg_id = uint8_t(A,6);
         switch msg_id
             case 15
-                if int16(crc(A,1,144)) == get_crc(A)                    
-                    if i<=100
-                        time(i,1) = uint32_t(A,7,10);
-                        ax(i,1) = single(int16_t(A,11,12) * 9.8) / 1000;
-                        ay(i,1) = single(int16_t(A,13,14) * 9.8) / 1000;
-                        az(i,1) = single(int16_t(A,15,16) * 9.8) / 1000;
-                        gx(i,1) = single(int16_t(A,17,18)) * pi() / 180000;
-                        gy(i,1) = single(int16_t(A,19,20)) * pi() / 180000;
-                        gz(i,1) = single(int16_t(A,21,22)) * pi() / 180000;
-                        
-                        temp = gx(i,1);
-                        gx(i,1) = -gy(i,1);
-                        gy(i,1) = temp;
-                        
-                        gyro = [gx(i,1) gy(i,1) gz(i,1)]';
-                        
-                        trans = [1, sin(phi) * tan(theta),  cos(phi) * tan(theta);
-                                 0, cos(phi)             , -sin(phi);
-                                 0, sin(phi) * sec(theta),  cos(phi) * sec(theta)];
-                             
-                        if i > 1
-                            dt = single(time(i,1) - time(i-1,1)) / 1000;
-                            attitude = attitude + trans * gyro .* dt;
-                        else
-                            dt = 0;
-                        end                        
-                        
-                        phi   = attitude(1,1);
-                        theta = attitude(2,1);
-                        psi   = attitude(3,1);
-                        
-                        point_a = RZ(RY(RX([1,0,0]',phi),theta),psi);
-                        point_b = RZ(RY(RX([0,-1,0]',phi),theta),psi);
-                        point_c = RZ(RY(RX([0,1,0]',phi),theta),psi);
-                        
-                        point_d = point_b - 0.5 * (point_b - point_c);
-                        s_x = [point_a(1,1), point_b(1,1), point_c(1,1), point_a(1,1);
-                            point_a(1,1), point_c(1,1), point_d(1,1), point_a(1,1)];
-                        s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
-                            point_a(2,1), point_c(2,1), point_d(2,1), point_a(2,1)];
-                        s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
-                            point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];                   
-                        
-                        
-                        disp(['time: ',num2str(time(i,1)),', ' ...
-                            'gx: ',num2str(gx(i,1)),', ' ...
-                            'gy: ', num2str(gy(i,1)),', ' ...
-                            'gz: ', num2str(gz(i,1)),', ' ...
-                            'phi: ', num2str(phi),', ' ...
-                            'theta: ', num2str(theta)])
+                if int16(crc(A,1,144)) == get_crc(A)                       
+                    time(i,1) = uint32_t(A,7,10);
+                    ax(i,1) = single(int16_t(A,11,12) * 9.8) / 1000;
+                    ay(i,1) = single(int16_t(A,13,14) * 9.8) / 1000;
+                    az(i,1) = single(int16_t(A,15,16) * 9.8) / 1000;
+                    gx(i,1) = single(int16_t(A,17,18)) * pi() / 180000;
+                    gy(i,1) = single(int16_t(A,19,20)) * pi() / 180000;
+                    gz(i,1) = single(int16_t(A,21,22)) * pi() / 180000;
+                    
+                    temp = gx(i,1);
+                    gx(i,1) = -gy(i,1);
+                    gy(i,1) = temp;
+                    
+                    gyro = [gx(i,1) gy(i,1) gz(i,1)]';
+                    
+                    if i > 1
+                        trans = [1, sin(phi_gyro(i-1,1)) * tan(theta_gyro(i-1,1)),  cos(phi_gyro(i-1,1)) * tan(theta_gyro(i-1,1));
+                            0, cos(phi_gyro(i-1,1))                         , -sin(phi_gyro(i-1,1));
+                            0, sin(phi_gyro(i-1,1)) * sec(theta_gyro(i-1,1)),  cos(phi_gyro(i-1,1)) * sec(theta_gyro(i-1,1))];
                     else
-                        time(1,:) = [];
-                        ax(1,:) = [];
-                        ay(1,:) = [];
-                        az(1,:) = [];
-                        gx(1,:) = []; 
-                        gy(1,:) = [];
-                        gz(1,:) = [];
-                        time(100,1) = uint32_t(A,7,10);
-                        ax(100,1) = single(int16_t(A,11,12) * 9.8) / 1000;
-                        ay(100,1) = single(int16_t(A,13,14) * 9.8) / 1000;
-                        az(100,1) = single(int16_t(A,15,16) * 9.8) / 1000;
-                        gx(100,1) = single(int16_t(A,17,18)) * pi() / 180000;
-                        gy(100,1) = single(int16_t(A,19,20)) * pi() / 180000;
-                        gz(100,1) = single(int16_t(A,21,22)) * pi() / 180000;
-                        
-                        temp = gx(100,1);
-                        gx(100,1) = -gy(100,1);
-                        gy(100,1) = temp;
-                        
-                        gyro = [gx(100,1) gy(100,1) gz(100,1)]';
-                        
-                        trans = [1, sin(phi) * tan(theta),  cos(phi) * tan(theta);
-                                 0, cos(phi)             , -sin(phi);
-                                 0, sin(phi) * sec(theta),  cos(phi) * sec(theta)];
-                             
-                        dt = single(time(100,1) - time(99,1)) / 1000;
-                        attitude = attitude + trans * gyro .* dt;
-                        
-                        phi   = attitude(1,1);
-                        theta = attitude(2,1);
-                        psi   = attitude(3,1);
-                        
-                        point_a = RY(RX([1,0,0]',phi),theta);
-                        point_b = RY(RX([0,-1,0]',phi),theta);
-                        point_c = RY(RX([0,1,0]',phi),theta);
-                        
-                        point_d = point_b - 0.5 * (point_b - point_c);
-                        s_x = [point_a(1,1), point_b(1,1), point_c(1,1), point_a(1,1);
-                            point_a(1,1), point_c(1,1), point_d(1,1), point_a(1,1)];
-                        s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
-                            point_a(2,1), point_c(2,1), point_d(2,1), point_a(2,1)];
-                        s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
-                            point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];                        
-                        
-                        
-                        disp(['time: ',num2str(time(100,1)),', ' ...
-                            'gx: ',num2str(gx(100,1)),', ' ...
-                            'gy: ', num2str(gy(100,1)),', ' ...
-                            'gz: ', num2str(gz(100,1)),', ' ...
-                            'phi: ', num2str(phi),', ' ...
-                            'theta: ', num2str(theta)])
+                        trans = [1, 0, 0;
+                            0, 1, 0;
+                            0, 0, 1];
+                    end
+                    
+                    if i > 1
+                        dt = single(time(i,1) - time(i-1,1)) / 1000;
+                        attitude_gyro = attitude_gyro + trans * gyro .* dt;
+                    else
+                        dt = 0;
+                    end
+                    
+                    phi_gyro(i,1)   = attitude_gyro(1,1);
+                    theta_gyro(i,1) = attitude_gyro(2,1);
+                    psi_gyro(i,1)   = attitude_gyro(3,1);
+                    
+                    point_a = RZ(RY(RX([1,0,0]',phi_gyro(i,1)),theta_gyro(i,1)),psi_gyro(i,1));
+                    point_b = RZ(RY(RX([0,-1,0]',phi_gyro(i,1)),theta_gyro(i,1)),psi_gyro(i,1));
+                    point_c = RZ(RY(RX([0,1,0]',phi_gyro(i,1)),theta_gyro(i,1)),psi_gyro(i,1));
+                    
+                    point_d = point_b - 0.5 * (point_b - point_c);
+                    s_x = [point_a(1,1), point_b(1,1), point_c(1,1), point_a(1,1);
+                        point_a(1,1), point_c(1,1), point_d(1,1), point_a(1,1)];
+                    s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
+                        point_a(2,1), point_c(2,1), point_d(2,1), point_a(2,1)];
+                    s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
+                        point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
+                    
+                    disp(['time: ',num2str(time(i,1)),', ' ...
+                        'gx: ',num2str(gx(i,1)),', ' ...
+                        'gy: ', num2str(gy(i,1)),', ' ...
+                        'gz: ', num2str(gz(i,1)),', ' ...
+                        'phi: ', num2str(phi_gyro(i,1)),', ' ...
+                        'theta: ', num2str(theta_gyro(i,1))])
+                    if i<=100
+                        time_plot = time;
+                        gx_plot   = gx;
+                        gy_plot   = gy;
+                        gz_plot   = gz;
+                    else
+                        time_plot = time(size(time,1)-100:end);
+                        gx_plot   = gx(size(gx,1)-100:end);
+                        gy_plot   = gy(size(gy,1)-100:end);
+                        gz_plot   = gz(size(gz,1)-100:end);
                     end
 
-                    h1.XData = time;
-                    h1.YData = gx;
-                    h2.XData = time;
-                    h2.YData = gy;
-                    h3.XData = time;
-                    h3.YData = gz;
+                    h1.XData = time_plot;
+                    h1.YData = gx_plot;
+                    h2.XData = time_plot;
+                    h2.YData = gy_plot;
+                    h3.XData = time_plot;
+                    h3.YData = gz_plot;
                     h4.XData = s_x;
                     h4.YData = s_y;
                     h4.ZData = s_z;
