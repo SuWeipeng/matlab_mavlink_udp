@@ -133,11 +133,11 @@ while 1
                     
                     point_d = point_b - 0.5 * (point_b - point_c);
                     s_x = [point_a(1,1), point_b(1,1), point_c(1,1), point_a(1,1);
-                        point_a(1,1), point_c(1,1), point_d(1,1), point_a(1,1)];
+                           point_a(1,1), point_c(1,1), point_d(1,1), point_a(1,1)];
                     s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
-                        point_a(2,1), point_c(2,1), point_d(2,1), point_a(2,1)];
+                           point_a(2,1), point_c(2,1), point_d(2,1), point_a(2,1)];
                     s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
-                        point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
+                           point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
                     
                     disp(['time: ',num2str(time(i,1)),', ' ...
                         'gx: ',num2str(gx(i,1)),', ' ...
