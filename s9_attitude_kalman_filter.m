@@ -21,15 +21,19 @@ s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
 s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
        point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
 
-var_acc    = 1e-2;
 var_driver = 3e-3;
+var_init   = 1e-2;
+var_acc    = [var_init, var_init]';
+
 dt = 0;
 A = [1 -dt 0 0; 0 1 0 0; 0 0 1 -dt; 0 0 0 1];
 B = [dt 0 0 0; 0 0 dt 0]';
 C = [1 0 0 0; 0 0 1 0];
 P = eye(4);
 Q = eye(4) * 3e-3;
-R = eye(2) * var_acc;
+R = eye(2);
+R(1,1) = R(1,1) * var_acc(1);
+R(2,2) = R(2,2) * var_acc(2);
 state_estimate = [0 0 0 0]';
 
 alpha = 0.1;
@@ -137,7 +141,9 @@ while 1
                                     0];
                     
                     if i > 1
-                        R = eye(2) * var_acc;
+                        R = eye(2);
+                        R(1,1) = R(1,1) * var_acc(1);
+                        R(2,2) = R(2,2) * var_acc(2);
                         
                         measurement = [attitude_acc(1,1) attitude_acc(2,1)]';
                         attitude_angular_rate = trans * gyro;
@@ -164,9 +170,12 @@ while 1
                     
                     cnt = 50;
                     if i>cnt
-                        var_acc = (var(phi_acc(size(phi_acc,1)-cnt:end))+ var(theta_acc(size(theta_acc,1)-cnt:end))) / 2;
-                        if var_acc < var_driver
-                            var_acc = var_driver;
+                        var_acc = [var(phi_acc(size(phi_acc,1)-cnt:end)), var(theta_acc(size(theta_acc,1)-cnt:end))]';
+                        if var_acc(1) < var_driver
+                            var_acc(1) = var_driver;
+                        end
+                        if var_acc(2) < var_driver
+                            var_acc(2) = var_driver;
                         end
                     end
                     
@@ -200,7 +209,8 @@ while 1
                     s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
                            point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
                        
-                    disp(['var: ',num2str(var_acc)])
+                    disp(['var_phi: ',num2str(var_acc(1)),', ' ...
+                        'var_theta: ', num2str(var_acc(2))])
                     
                     h1.XData = time_plot;
                     h1.YData = phi_acc_plot;
@@ -217,7 +227,7 @@ while 1
                     h7.XData = s_x;
                     h7.YData = s_y;
                     h7.ZData = s_z;
-                    title(sprintf('%1.3f',var_acc),'FontSize',26,'FontWeight','bold','Color','r','Rotation',0)
+                    title(sprintf('phi:%1.3f, theta:%1.3f',var_acc(1), var_acc(2)),'FontSize',26,'FontWeight','bold','Color','r','Rotation',0)
                     drawnow
                     i = i + 1;
                 end
