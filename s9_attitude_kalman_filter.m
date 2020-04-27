@@ -140,9 +140,10 @@ while 1
                         R = eye(2) * var_acc;
                         
                         measurement = [attitude_acc(1,1) attitude_acc(2,1)]';
-                        attitude_gyro = attitude_gyro + trans * gyro .* dt;
+                        attitude_angular_rate = trans * gyro;
+                        attitude_gyro = attitude_gyro + attitude_angular_rate .* dt;
                         
-                        state_estimate = A * state_estimate + B * [attitude_gyro(1,1), attitude_gyro(2,1)]';
+                        state_estimate = A * state_estimate + B * [attitude_angular_rate(1,1), attitude_angular_rate(2,1)]';
                         P = A * P * A' + Q;
                         K = P * C' * inv(R + C * P * C');
                         state_estimate = state_estimate + K * (measurement - C * state_estimate);
