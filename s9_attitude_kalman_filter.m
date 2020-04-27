@@ -9,7 +9,10 @@ az = 0;
 gx = 0;
 gy = 0;
 gz = 0;
-
+trans = [1, 0, 0;
+         0, 1, 0;
+         0, 0, 1];
+     
 point_a = [1,0,0]';
 point_b = [0,-1,0]';
 point_c = [0,1,0]';
@@ -21,12 +24,12 @@ s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
 s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
        point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
 
-var_driver = 3e-3;
+var_driver = 1.5e-6;
 var_init   = 1e-2;
 var_acc    = [var_init, var_init]';
 
 dt = 0;
-A = [1 -dt 0 0; 0 1 0 0; 0 0 1 -dt; 0 0 0 1];
+A = [1 dt 0 0; 0 1 0 0; 0 0 1 dt; 0 0 0 1];
 B = [dt 0 0 0; 0 0 dt 0]';
 C = [1 0 0 0; 0 0 1 0];
 P = eye(4);
@@ -120,42 +123,34 @@ while 1
                     ax(i,1) = -ay(i,1);
                     ay(i,1) = temp;
                     
-                    gyro = [gx(i,1) gy(i,1) gz(i,1)]';
+                    attitude_acc = [atan2( ay(i,1), sqrt(ax(i,1) ^ 2 + az(i,1) ^ 2));
+                                    atan2(-ax(i,1), sqrt(ay(i,1) ^ 2 + az(i,1) ^ 2));
+                                    0];
+                                
+                    gyro = [gx(i,1) gy(i,1) gz(i,1)]'.* 8;
                     
                     if i > 1
                         dt = single(time(i,1) - time(i-1,1)) / 1000;
-                        A  = [1 -dt 0 0; 0 1 0 0; 0 0 1 -dt; 0 0 0 1];
+                        A  = [1 dt 0 0; 0 1 0 0; 0 0 1 dt; 0 0 0 1];
                         B  = [dt 0 0 0; 0 0 dt 0]';
                         
                         trans = [1, sin(phi_flt(i-1,1)) * tan(theta_flt(i-1,1)),  cos(phi_flt(i-1,1)) * tan(theta_flt(i-1,1));
                                  0, cos(phi_flt(i-1,1))                        , -sin(phi_flt(i-1,1));
                                  0, sin(phi_flt(i-1,1)) * sec(theta_flt(i-1,1)),  cos(phi_flt(i-1,1)) * sec(theta_flt(i-1,1))];
-                    else
-                        trans = [1, 0, 0;
-                                 0, 1, 0;
-                                 0, 0, 1];
-                    end
-                    
-                    attitude_acc = [atan2( ay(i,1), sqrt(ax(i,1) ^ 2 + az(i,1) ^ 2));
-                                    atan2(-ax(i,1), sqrt(ay(i,1) ^ 2 + az(i,1) ^ 2));
-                                    0];
-                    
-                    if i > 1
+                             
                         R = eye(2);
                         R(1,1) = R(1,1) * var_acc(1);
                         R(2,2) = R(2,2) * var_acc(2);
                         
                         measurement = [attitude_acc(1,1) attitude_acc(2,1)]';
                         attitude_angular_rate = trans * gyro;
-                        attitude_gyro = attitude_gyro + attitude_angular_rate .* dt;
+                        attitude_gyro = attitude_gyro + trans * gyro .* dt;
                         
                         state_estimate = A * state_estimate + B * [attitude_angular_rate(1,1), attitude_angular_rate(2,1)]';
                         P = A * P * A' + Q;
                         K = P * C' * inv(R + C * P * C');
                         state_estimate = state_estimate + K * (measurement - C * state_estimate);
                         P = (eye(4) - K * C) * P;
-                    else
-                        dt = 0;
                     end
                     
                     phi_gyro(i,1)   = attitude_gyro(1,1);
@@ -171,11 +166,21 @@ while 1
                     cnt = 50;
                     if i>cnt
                         var_acc = [var(phi_acc(size(phi_acc,1)-cnt:end)), var(theta_acc(size(theta_acc,1)-cnt:end))]';
-                        if var_acc(1) < var_driver
-                            var_acc(1) = var_driver;
+                        
+                        l_lim = 1e-3;
+                        h_lim = 1.3e0;
+                        if var_acc(1) < l_lim
+                            var_acc(1) = l_lim;
                         end
-                        if var_acc(2) < var_driver
-                            var_acc(2) = var_driver;
+                        if var_acc(2) < l_lim
+                            var_acc(2) = l_lim;
+                        end
+                        
+                        if var_acc(1) > h_lim
+                            var_acc(1) = h_lim;
+                        end
+                        if var_acc(2) > h_lim
+                            var_acc(2) = h_lim;
                         end
                     end
                     
@@ -220,10 +225,10 @@ while 1
                     h3.YData = theta_acc_plot;
                     h4.XData = time_plot;
                     h4.YData = theta_flt_plot;
-%                     h5.XData = time_plot;
-%                     h5.YData = phi_gyro_plot;
-%                     h6.XData = time_plot;
-%                     h6.YData = theta_gyro_plot;    
+                    h5.XData = time_plot;
+                    h5.YData = phi_gyro_plot;
+                    h6.XData = time_plot;
+                    h6.YData = theta_gyro_plot;    
                     h7.XData = s_x;
                     h7.YData = s_y;
                     h7.ZData = s_z;
