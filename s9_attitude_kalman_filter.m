@@ -24,19 +24,22 @@ s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
 s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
        point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
 
-var_driver = 1.5e-6;
-var_init   = 1e-2;
-var_acc    = [var_init, var_init]';
+var_driver     = 1.5e-6;
+var_acc_init   = 1e-5;
+var_acc        = [var_acc_init, var_acc_init]';
+var_gyro_init  = 1e-5;
+var_gyro       = [var_gyro_init, var_gyro_init]';
 
-dt = 0;
+dt = 60/1000;
 A = [1 dt 0 0; 0 1 0 0; 0 0 1 dt; 0 0 0 1];
-B = [dt 0 0 0; 0 0 dt 0]';
-C = [1 0 0 0; 0 0 1 0];
+C = eye(4);
 P = eye(4);
 Q = eye(4) * 3e-3;
-R = eye(2);
+R = eye(4);
 R(1,1) = R(1,1) * var_acc(1);
-R(2,2) = R(2,2) * var_acc(2);
+R(2,2) = R(2,2) * var_gyro(1);
+R(3,3) = R(3,3) * var_acc(2);
+R(4,4) = R(4,4) * var_gyro(2);
 state_estimate = [0 0 0 0]';
 
 alpha = 0.1;
@@ -55,7 +58,7 @@ h1 = plot(time,ax,'-r.');
 hold on
 grid on
 h2 = plot(time,phi_flt,'LineWidth',3,'Color',[1 0 1]);
-% h5 = plot(time,gx,'-b.');
+h5 = plot(time,gx,'-b.');
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
 set(gca, 'GridAlpha', 1);
@@ -73,7 +76,7 @@ h3 = plot(time,ay,'-r.');
 hold on
 grid on
 h4 = plot(time,theta_flt,'LineWidth',3,'Color',[1 0 1]);
-% h6 = plot(time,gy,'-b.');
+h6 = plot(time,gy,'-b.');
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
 set(gca, 'GridAlpha', 1);
@@ -101,19 +104,19 @@ fopen(t)
 i = 1;
 while 1
     tic
-    A = dec2hex(fread(t));
-    if ~isempty(A)
-        msg_id = uint8_t(A,6);
+    msg = dec2hex(fread(t));
+    if ~isempty(msg)
+        msg_id = uint8_t(msg,6);
         switch msg_id
             case 15
-                if int16(crc(A,1,144)) == get_crc(A)            
-                    time(i,1) = uint32_t(A,7,10);
-                    ax(i,1) = single(int16_t(A,11,12) * 9.8) / 1000;
-                    ay(i,1) = single(int16_t(A,13,14) * 9.8) / 1000;
-                    az(i,1) = single(int16_t(A,15,16) * 9.8) / 1000;
-                    gx(i,1) = single(int16_t(A,17,18)) * pi() / 18000;
-                    gy(i,1) = single(int16_t(A,19,20)) * pi() / 18000;
-                    gz(i,1) = single(int16_t(A,21,22)) * pi() / 18000;
+                if int16(crc(msg,1,144)) == get_crc(msg)            
+                    time(i,1) = uint32_t(msg,7,10);
+                    ax(i,1) = single(int16_t(msg,11,12) * 9.8) / 1000;
+                    ay(i,1) = single(int16_t(msg,13,14) * 9.8) / 1000;
+                    az(i,1) = single(int16_t(msg,15,16) * 9.8) / 1000;
+                    gx(i,1) = single(int16_t(msg,17,18)) * pi() / 18000;
+                    gy(i,1) = single(int16_t(msg,19,20)) * pi() / 18000;
+                    gz(i,1) = single(int16_t(msg,21,22)) * pi() / 18000;
                     
                     temp = gx(i,1);
                     gx(i,1) = -gy(i,1);
@@ -129,24 +132,25 @@ while 1
                                 
                     gyro = [gx(i,1) gy(i,1) gz(i,1)]';
                     
-                    if i > 1
-                        dt = single(time(i,1) - time(i-1,1)) / 1000;
-                        A  = [1 dt 0 0; 0 1 0 0; 0 0 1 dt; 0 0 0 1];
-                        B  = [dt 0 0 0; 0 0 dt 0]';
-                        
+                    if i > 1                        
                         trans = [1, sin(phi_flt(i-1,1)) * tan(theta_flt(i-1,1)),  cos(phi_flt(i-1,1)) * tan(theta_flt(i-1,1));
                                  0, cos(phi_flt(i-1,1))                        , -sin(phi_flt(i-1,1));
                                  0, sin(phi_flt(i-1,1)) * sec(theta_flt(i-1,1)),  cos(phi_flt(i-1,1)) * sec(theta_flt(i-1,1))];
                              
-                        R = eye(2);
+                        R = eye(4);
                         R(1,1) = R(1,1) * var_acc(1);
-                        R(2,2) = R(2,2) * var_acc(2);
+                        R(2,2) = R(2,2) * var_gyro(1);
+                        R(3,3) = R(3,3) * var_acc(2);
+                        R(4,4) = R(4,4) * var_gyro(2);
                         
-                        measurement = [attitude_acc(1,1) attitude_acc(2,1)]';
                         attitude_angular_rate = trans * gyro;
-                        attitude_gyro = attitude_gyro + trans * gyro .* dt;
+                        attitude_gyro = attitude_gyro + attitude_angular_rate .* dt;
+                        measurement = [attitude_acc(1,1) attitude_angular_rate(1,1) attitude_acc(2,1) attitude_angular_rate(2,1)]';
                         
-                        state_estimate = A * state_estimate + B * [attitude_angular_rate(1,1), attitude_angular_rate(2,1)]';
+                        phi_rate_gyro(i,1) = measurement(2,1);
+                        theta_rate_gyro(i,1) = measurement(4,1);
+                        
+                        state_estimate = A * state_estimate;
                         P = A * P * A' + Q;
                         K = P * C' * inv(R + C * P * C');
                         state_estimate = state_estimate + K * (measurement - C * state_estimate);
@@ -161,27 +165,14 @@ while 1
                     theta_acc(i,1) = attitude_acc(2,1);
                     
                     phi_flt(i,1) =  state_estimate(1,1);
+                    phi_rate(i,1) = state_estimate(2,1);
                     theta_flt(i,1) = state_estimate(3,1);
+                    theta_rate(i,1) = state_estimate(4,1);
                     
-                    cnt = 50;
+                    cnt = 10;
                     if i>cnt
-                        var_acc = [var(phi_acc(size(phi_acc,1)-cnt:end)), var(theta_acc(size(theta_acc,1)-cnt:end))]';
-                        
-                        l_lim = 1e-3;
-                        h_lim = 1.3e0;
-                        if var_acc(1) < l_lim
-                            var_acc(1) = l_lim;
-                        end
-                        if var_acc(2) < l_lim
-                            var_acc(2) = l_lim;
-                        end
-                        
-                        if var_acc(1) > h_lim
-                            var_acc(1) = h_lim;
-                        end
-                        if var_acc(2) > h_lim
-                            var_acc(2) = h_lim;
-                        end
+                        var_acc  = [var(phi_acc(size(phi_acc,1)-cnt:end)), var(theta_acc(size(theta_acc,1)-cnt:end))]';
+                        var_gyro = [var(phi_rate_gyro(size(phi_rate_gyro,1)-cnt:end)), var(theta_rate_gyro(size(theta_rate_gyro,1)-cnt:end))]';
                     end
                     
                     if i<=100
