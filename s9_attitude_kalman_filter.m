@@ -111,9 +111,9 @@ while 1
                     ax(i,1) = single(int16_t(A,11,12) * 9.8) / 1000;
                     ay(i,1) = single(int16_t(A,13,14) * 9.8) / 1000;
                     az(i,1) = single(int16_t(A,15,16) * 9.8) / 1000;
-                    gx(i,1) = single(int16_t(A,17,18)) * pi() / 180000;
-                    gy(i,1) = single(int16_t(A,19,20)) * pi() / 180000;
-                    gz(i,1) = single(int16_t(A,21,22)) * pi() / 180000;
+                    gx(i,1) = single(int16_t(A,17,18)) * pi() / 18000;
+                    gy(i,1) = single(int16_t(A,19,20)) * pi() / 18000;
+                    gz(i,1) = single(int16_t(A,21,22)) * pi() / 18000;
                     
                     temp = gx(i,1);
                     gx(i,1) = -gy(i,1);
@@ -127,7 +127,7 @@ while 1
                                     atan2(-ax(i,1), sqrt(ay(i,1) ^ 2 + az(i,1) ^ 2));
                                     0];
                                 
-                    gyro = [gx(i,1) gy(i,1) gz(i,1)]'.* 8;
+                    gyro = [gx(i,1) gy(i,1) gz(i,1)]';
                     
                     if i > 1
                         dt = single(time(i,1) - time(i-1,1)) / 1000;
