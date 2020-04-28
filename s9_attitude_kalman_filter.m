@@ -215,8 +215,8 @@ while 1
                     s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
                            point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
                        
-                    disp(['var_phi: ',num2str(var_acc(1)),', ' ...
-                        'var_theta: ', num2str(var_acc(2))])
+                    disp(['var_phi: ',num2str(var_acc(1,i)),', ' ...
+                        'var_theta: ', num2str(var_acc(2,i))])
                     
                     h1.XData = time_plot;
                     h1.YData = phi_acc_plot;
