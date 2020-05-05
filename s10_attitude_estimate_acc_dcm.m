@@ -50,16 +50,16 @@ while 1
                     
                     temp = ax(i,1);
                     ax(i,1) = -ay(i,1);
-                    ay(i,1) = temp;
+                    ay(i,1) = -temp;
                     
-                    phi_acc(i,1)   = atan2( ay(i,1), sqrt(ax(i,1) ^ 2 + az(i,1) ^ 2));
-                    theta_acc(i,1) = atan2(-ax(i,1), sqrt(ay(i,1) ^ 2 + az(i,1) ^ 2));
+                    phi_acc(i,1)   = atan2(-ay(i,1), sqrt(ax(i,1) ^ 2 + az(i,1) ^ 2));
+                    theta_acc(i,1) = atan2( ax(i,1), sqrt(ay(i,1) ^ 2 + az(i,1) ^ 2));
                     
                     acc_vector = [ax(i,1);ay(i,1);az(i,1)];
                     acc_norm = acc_vector / norm(acc_vector);
                     
-                    roll(i,1)      = asin(acc_norm(2));
-                    pitch(i,1)     = -atan2(acc_norm(1),acc_norm(3));
+                    roll(i,1)      = -asin(acc_norm(2));
+                    pitch(i,1)     = atan2(acc_norm(1),acc_norm(3));
                     
                     point_a = RY(RX([1,0,0]',phi_acc(i,1)),theta_acc(i,1));
                     point_b = RY(RX([0,-1,0]',phi_acc(i,1)),theta_acc(i,1));
@@ -77,8 +77,8 @@ while 1
                         'ax: ',num2str(ax(i,1)),', ' ...
                         'ay: ', num2str(ay(i,1)),', ' ...
                         'az: ', num2str(az(i,1)),', ' ...
-                        'phi: ', num2str(phi_acc(i,1)),', ' ...
-                        'theta: ', num2str(theta_acc(i,1))])
+                        'roll: ', num2str(rad2deg(roll(i,1))),', ' ...
+                        'pitch: ', num2str(rad2deg(pitch(i,1)))])
                     if i<=100
                         time_plot = time;
                         phi_acc_plot     = phi_acc;
