@@ -12,9 +12,6 @@ az = 0;
 gx = 0;
 gy = 0;
 gz = 0;
-trans = [1, 0, 0;
-         0, 1, 0;
-         0, 0, 1];
      
 point_a = [1,0,0]';
 point_b = [0,-1,0]';
@@ -61,7 +58,6 @@ h1 = plot(time,ax,'-r.');
 hold on
 grid on
 h2 = plot(time,phi_flt,'LineWidth',3,'Color',[1 0 1]);
-% h5 = plot(time,gx,'-b.');
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
 set(gca, 'GridAlpha', 1);
@@ -79,7 +75,6 @@ h3 = plot(time,ay,'-r.');
 hold on
 grid on
 h4 = plot(time,theta_flt,'-b.');
-% h6 = plot(time,gy,'-b.');
 ylim([-100 100])
 set(gca, 'GridLineStyle', ':');
 set(gca, 'GridAlpha', 1);
@@ -124,30 +119,23 @@ while 1
                     
                     temp = gx(i,1);
                     gx(i,1) = -gy(i,1);
-                    gy(i,1) = temp;
+                    gy(i,1) = -temp;
                     
                     temp = ax(i,1);
                     ax(i,1) = -ay(i,1);
-                    ay(i,1) = temp;
+                    ay(i,1) = -temp;
                     
-                    attitude_acc = [atan2( ay(i,1), sqrt(ax(i,1) ^ 2 + az(i,1) ^ 2));
-                                    atan2(-ax(i,1), sqrt(ay(i,1) ^ 2 + az(i,1) ^ 2));
+                    acc_vector = [ax(i,1);ay(i,1);az(i,1)];
+                    acc_norm   = acc_vector / norm(acc_vector);
+                    phi_acc(i,1)  = -asin(acc_norm(2));
+                    theta_acc(i,1) = atan2(acc_norm(1),acc_norm(3));
+                    
+                    attitude_acc = [phi_acc(i,1);
+                                    theta_acc(i,1);
                                     0];
-                    phi_acc(i,1)   = attitude_acc(1,1);
-                    theta_acc(i,1) = attitude_acc(2,1);
-                                
-                    gyro = [gx(i,1) gy(i,1) gz(i,1)]';
                     
-                    if i > 1                        
-                        trans = [1, sin(phi_flt(i-1,1)) * tan(theta_flt(i-1,1)),  cos(phi_flt(i-1,1)) * tan(theta_flt(i-1,1));
-                                 0, cos(phi_flt(i-1,1))                        , -sin(phi_flt(i-1,1));
-                                 0, sin(phi_flt(i-1,1)) * sec(theta_flt(i-1,1)),  cos(phi_flt(i-1,1)) * sec(theta_flt(i-1,1))];
-                             
-                        attitude_angular_rate = trans * gyro;
-                        attitude_gyro = attitude_gyro + attitude_angular_rate .* dt;
-                        phi_gyro(i,1)   = attitude_gyro(1,1);
-                        theta_gyro(i,1) = attitude_gyro(2,1);
-                        psi_gyro(i,1)   = attitude_gyro(3,1);
+                    if i > 1          
+                        attitude_angular_rate = [gx(i,1); gy(i,1); gz(i,1)];
                         
                         measurement = [attitude_acc(1,1) attitude_angular_rate(1,1) attitude_acc(2,1) attitude_angular_rate(2,1)]';
                         
@@ -187,8 +175,6 @@ while 1
                         phi_flt_plot    = phi_flt;
                         theta_acc_plot  = theta_acc;
                         theta_flt_plot  = theta_flt;
-                        phi_gyro_plot   = phi_gyro;
-                        theta_gyro_plot = theta_gyro;
                         var_acc_plot    = var_acc(1,:)';
                         var_gyro_plot   = var_gyro(1,:)';
                     else
@@ -197,8 +183,6 @@ while 1
                         phi_flt_plot    = phi_flt(size(phi_flt,1)-100:end);
                         theta_acc_plot  = theta_acc(size(theta_acc,1)-100:end);
                         theta_flt_plot  = theta_flt(size(theta_flt,1)-100:end);
-                        phi_gyro_plot   = phi_gyro(size(phi_gyro,1)-100:end);
-                        theta_gyro_plot = theta_gyro(size(theta_gyro,1)-100:end);
                         var_acc_plot    = var_acc(1,size(var_acc,2)-100:end)';
                         var_gyro_plot   = var_gyro(1,size(var_gyro,2)-100:end)';
                     end
@@ -225,11 +209,7 @@ while 1
                     h3.XData = time_plot;
                     h3.YData = var_acc_plot;
                     h4.XData = time_plot;
-                    h4.YData = var_gyro_plot;
-                    h5.XData = time_plot;
-                    h5.YData = phi_gyro_plot;
-                    h6.XData = time_plot;
-                    h6.YData = theta_gyro_plot;    
+                    h4.YData = var_gyro_plot;   
                     h7.XData = s_x;
                     h7.YData = s_y;
                     h7.ZData = s_z;
