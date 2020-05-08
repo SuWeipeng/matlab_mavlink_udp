@@ -96,9 +96,9 @@ while 1
                     ax(i,1) = single(int16_t(A,11,12) * 9.8) / 1000;
                     ay(i,1) = single(int16_t(A,13,14) * 9.8) / 1000;
                     az(i,1) = single(int16_t(A,15,16) * 9.8) / 1000;
-                    gx(i,1) = single(int16_t(A,17,18)) * pi() / 180000;
-                    gy(i,1) = single(int16_t(A,19,20)) * pi() / 180000;
-                    gz(i,1) = single(int16_t(A,21,22)) * pi() / 180000;
+                    gx(i,1) = single(int16_t(A,17,18)) * pi() / 18000;
+                    gy(i,1) = single(int16_t(A,19,20)) * pi() / 18000;
+                    gz(i,1) = single(int16_t(A,21,22)) * pi() / 18000;
                     
                     temp = gx(i,1);
                     gx(i,1) = -gy(i,1);
@@ -108,12 +108,12 @@ while 1
                     
                     if i > 1
                         trans = [1, sin(phi_gyro(i-1,1)) * tan(theta_gyro(i-1,1)),  cos(phi_gyro(i-1,1)) * tan(theta_gyro(i-1,1));
-                            0, cos(phi_gyro(i-1,1))                         , -sin(phi_gyro(i-1,1));
-                            0, sin(phi_gyro(i-1,1)) * sec(theta_gyro(i-1,1)),  cos(phi_gyro(i-1,1)) * sec(theta_gyro(i-1,1))];
+                                 0, cos(phi_gyro(i-1,1))                         , -sin(phi_gyro(i-1,1));
+                                 0, sin(phi_gyro(i-1,1)) * sec(theta_gyro(i-1,1)),  cos(phi_gyro(i-1,1)) * sec(theta_gyro(i-1,1))];
                     else
                         trans = [1, 0, 0;
-                            0, 1, 0;
-                            0, 0, 1];
+                                 0, 1, 0;
+                                 0, 0, 1];
                     end
                     
                     if i > 1
@@ -140,11 +140,11 @@ while 1
                            point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
                     
                     disp(['time: ',num2str(time(i,1)),', ' ...
-                        'gx: ',num2str(gx(i,1)),', ' ...
-                        'gy: ', num2str(gy(i,1)),', ' ...
-                        'gz: ', num2str(gz(i,1)),', ' ...
-                        'phi: ', num2str(phi_gyro(i,1)),', ' ...
-                        'theta: ', num2str(theta_gyro(i,1))])
+                          'gx: ',num2str(gx(i,1)),', ' ...
+                          'gy: ', num2str(gy(i,1)),', ' ...
+                          'gz: ', num2str(gz(i,1)),', ' ...
+                          'phi: ', num2str(phi_gyro(i,1)),', ' ...
+                          'theta: ', num2str(theta_gyro(i,1))])
                     if i<=100
                         time_plot = time;
                         gx_plot   = gx;
