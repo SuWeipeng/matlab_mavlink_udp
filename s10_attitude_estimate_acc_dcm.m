@@ -61,18 +61,6 @@ while 1
                     roll(i,1)      = -asin(acc_norm(2));
                     pitch(i,1)     = atan2(acc_norm(1),acc_norm(3));
                     
-                    point_a = RY(RX([1,0,0]',phi_acc(i,1)),theta_acc(i,1));
-                    point_b = RY(RX([0,-1,0]',phi_acc(i,1)),theta_acc(i,1));
-                    point_c = RY(RX([0,1,0]',phi_acc(i,1)),theta_acc(i,1));
-                    
-                    point_d = point_b - 0.5 * (point_b - point_c);
-                    s_x = [point_a(1,1), point_b(1,1), point_c(1,1), point_a(1,1);
-                           point_a(1,1), point_c(1,1), point_d(1,1), point_a(1,1)];
-                    s_y = [point_a(2,1), point_b(2,1), point_c(2,1), point_a(2,1);
-                           point_a(2,1), point_c(2,1), point_d(2,1), point_a(2,1)];
-                    s_z = [point_a(3,1), point_b(3,1), point_c(3,1), point_a(3,1);
-                           point_a(3,1), point_c(3,1), point_d(3,1), point_a(3,1)];
-                    
                     disp(['time: ',num2str(time(i,1)),', ' ...
                         'ax: ',num2str(ax(i,1)),', ' ...
                         'ay: ', num2str(ay(i,1)),', ' ...
