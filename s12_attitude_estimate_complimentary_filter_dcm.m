@@ -54,6 +54,7 @@ phi_dcm       = 0;
 theta_dcm     = 0;
 roll          = 0;
 pitch         = 0;
+alpha         = 0.3;
 
 i = 1;
 while 1
@@ -94,6 +95,7 @@ while 1
                         delta_pitch = gy(i,1)*dt;
                         delta_yaw   = gz(i,1)*dt;
                         unit_g = RZ(RY(RX(unit_g,delta_roll),delta_pitch),delta_yaw);
+                        unit_g = (1 - alpha) * unit_g + alpha * acc_norm; 
                     else
                         dt = 0;
                     end
